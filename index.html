@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+    <title>Whiteboard Demo</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+        }
+        h1 {
+            font-weight: 200;
+        }
+        input {
+            height: 32px;
+            min-width: 256px;
+            padding-left: 4px;
+            font-size: large;
+            margin-left: 8px;
+            border: 1px solid #ff5fdd;
+        }
+        input:focus {
+            border: 2px solid #ff66aa;
+        }
+        button {
+            height: 36px;
+            min-width: 128px;
+            font-size: medium;
+            background-color: blanchedalmond;
+        }
+        button:hover {
+            cursor: pointer;
+            background-color: beige;
+        }
+        canvas {
+            border: 1px solid blue;
+            width: 480px;
+            height: 480px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="status">No one is drawing.</h1>
+    <canvas></canvas>
+    <div>
+        <label>Name</label>
+        <input type="text" id="name" value="YOURNAME" />
+        ||
+        <button type="button" id="clear-button">Clear Whiteboard</button>
+    </div>
+    <hr />
+    <h2>About</h2>
+    <p>
+        Concept of a whiteboard using WebSockets.
+    </p>
+    <p>
+        Roger Ngo<br/> rogerngo.com
+    </p>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var r = Math.round(Math.random() * 75 + 100);
+      var g = Math.round(Math.random() * 100 + 100);
+      var b = Math.round(Math.random() * 75 + 100);
+
+      var socket = io();
+
+      var canvas = $('canvas').get(0);
+      canvas.width = 480;
+      canvas.height = 480;
+
+      var context = canvas.getContext('2d');
+      context.strokeStyle = 'rgb(' + r + ',' + g + ','  + b + ')';
+      context.lineWidth = 1;
+
+      var mouseClicked = false;
+      var x = 0, y = 0;
+
+      canvas.addEventListener('mousedown', function(e) {
+        x = Math.floor(e.pageX - canvas.offsetLeft);
+        y = Math.floor(e.pageY - canvas.offsetTop);
+
+        mouseClicked = true;
+        context.beginPath();
+        context.moveTo(x, y);
+
+        socket.emit('push', JSON.stringify({
+          type: 'move',
+          x: x,
+          y: y,
+          color: {
+            r: r,
+            g: g,
+            b: b
+          },
+          name: $('#name').val()
+        }));
+      });
+
+      canvas.addEventListener('mouseup', function(e) {
+        mouseClicked = false;
+        x = 0;
+        y = 0;
+      });
+
+      canvas.addEventListener('mousemove', function(e) {
+        if(mouseClicked) {
+          x = Math.floor(e.pageX - canvas.offsetLeft);
+          y = Math.floor(e.pageY - canvas.offsetTop);
+
+          context.lineTo(x, y);
+          context.stroke();
+
+          socket.emit('push', JSON.stringify({
+            type: 'draw',
+            x: x,
+            y: y,
+            color: {
+              r: r,
+              g: g,
+              b: b
+            },
+            name: $('#name').val()
+          }));
+        }
+      });
+
+      socket.on('receive', function(data) {
+        data = JSON.parse(data);
+        context.strokeStyle = 'rgb(' + data.color.r + ',' + data.color.g + ','  + data.color.b + ')';
+        if(data.type === 'move') {
+          context.beginPath();
+          context.moveTo(data.x, data.y);
+        } else {
+          context.lineTo(data.x, data.y);
+          context.stroke();
+        }
+
+        $('h1').html(data.name + ' is drawing...');
+      });
+
+      socket.on('clear', function(data) {
+        context.fillStyle = 'rgb(255, 255, 255)';
+        context.fillRect(0, 0, 480, 480);
+      });
+
+      $('#clear-button').on('click', function() {
+        context.fillStyle = 'rgb(255, 255, 255)';
+        context.fillRect(0, 0, 480, 480);
+
+        socket.emit('clear', JSON.stringify({
+          type: 'clear',
+          x: 0,
+          y: 0
+        }));
+      });
+    </script>
+</body>
+</html>
