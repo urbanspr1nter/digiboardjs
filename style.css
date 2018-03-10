@@ -1,0 +1,82 @@
+body {
+    font-family: 'Helvetica', sans-serif;
+}
+h1 {
+    font-weight: 200;
+}
+label {
+    display: inline;
+}
+input {
+    height: 32px;
+    min-width: 256px;
+    max-width: 256px;
+    display: inline;
+    padding-left: 4px;
+    font-size: large;
+    margin-left: 8px;
+    border: 1px solid #999999;
+}
+input:focus {
+    border: 2px solid beige;
+}
+button {
+    height: 36px;
+    min-width: 128px;
+    font-size: medium;
+    background-color: blanchedalmond;
+    box-shadow: none;
+    border: 1px solid beige;
+}
+button:hover {
+    cursor: pointer;
+    background-color: beige;
+    border: 1px solid blanchedalmond;;
+}
+canvas {
+    border: 2px solid blanchedalmond;
+    width: 640px;
+    height: 640px;
+    box-shadow: 2px 3px 2px 3px #eaeaea;
+}
+canvas:hover {
+    cursor: pointer;
+}
+
+div.color {
+    border: 1px solid #999999;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+div.color[data-color='red'] {
+    background-color: #ff0000;
+}
+
+div.color[data-color='orange'] {
+    background-color: #ff8c00;
+}
+
+div.color[data-color='yellow'] {
+    background-color: #ffff00;
+}
+
+div.color[data-color='green'] {
+    background-color: #00bb00;
+}
+
+div.color[data-color='blue'] {
+    background-color: #0000bb;
+}
+
+div.color[data-color='purple'] {
+    background-color: #800080;
+}
+
+div.color[data-color='black'] {
+    background-color: #000000;
+}

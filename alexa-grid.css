@@ -1,0 +1,77 @@
+.grid {
+    width: 90%;
+    display: table;
+    margin-bottom: 4px;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.grid [class*='col-'] {
+    float: left;
+    min-height: 1px;
+    width: 8.33%;
+    box-sizing: border-box;
+}
+
+.grid [class*='col-']:not(:last-of-type) {
+    padding-right: 20px;
+}
+
+@media all and (max-width: 768px) {
+    .grid {
+        margin-left: 3%;
+        margin-right: 3%;
+    }
+
+    .grid [class*='col-']:not(:last-child) {
+        padding-right: 10px;
+    }
+}
+
+.grid .col-1 {
+    width: 8.33%;
+}
+
+.grid .col-2 {
+    width: 16.66%;
+}
+
+.grid .col-3 {
+    width: 25.00%;
+}
+
+.grid .col-4 {
+    width: 33.33%;
+}
+
+.grid .col-5 {
+    width: 41.66%;
+}
+
+.grid .col-6 {
+    width: 50.00%;
+}
+
+.grid .col-7 {
+    width: 58.33%;
+}
+
+.grid .col-8 {
+    width: 66.66%;
+}
+
+.grid .col-9 {
+    width: 75.00%;
+}
+
+.grid .col-10 {
+    width: 83.33%;
+}
+
+.grid .col-11 {
+    width: 91.66%;
+}
+
+.grid .col-12 {
+    width: 100.00%;
+}
