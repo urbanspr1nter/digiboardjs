@@ -6,12 +6,25 @@
     <title>Whiteboard Demo</title>
 </head>
 <body>
-    <div id="board-mount"></div>
-    <div class="grid">
-        <div class="col-7">
-            <h1 id="status">No one is drawing.</h1>
+    <div id="overlay" class="session-prompt-overlay"></div>
+    <div id="prompt" class="session-prompt">
+        <div>
+            What do you want to do?
         </div>
+        <div>
+            <button id="new-session" type="button">New Session</button>
+        </div>
+        <div>
+            Or, join an existing session.
+        </div>
+        <div>
+            <label>Session ID</label>
+            <input id="join-session-id" name="join-session-id" type="text" />
+            <button id="join-session" type="button">Join</button>
+        </div>
+
     </div>
+    <div id="board-mount"></div>
     <div class="grid">
         <div class="col-3">
             <h2>ABOUT</h2>

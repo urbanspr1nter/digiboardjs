@@ -80,3 +80,25 @@ div.color[data-color='purple'] {
 div.color[data-color='black'] {
     background-color: #000000;
 }
+
+.session-prompt-overlay {
+    position: absolute;
+    background-color: #ffffff;
+    opacity: 0.85;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+}
+
+.session-prompt {
+    background-color: #fafafa;
+    text-align: center;
+    padding: 128px;
+    margin: 12%;
+    position: absolute;
+    z-index: 11;
+}
+
+.session-prompt div {
+    margin-bottom: 16px;
+}
