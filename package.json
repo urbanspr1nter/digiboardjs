@@ -25,5 +25,8 @@
   },
   "devDependencies": {
     "webpack-cli": "2.0.12"
+  },
+  "engines": {
+    "node": ">=8.9"
   }
 }
