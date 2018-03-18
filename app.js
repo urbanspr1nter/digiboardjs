@@ -13,6 +13,13 @@ app.get('/', function(req, res) {
     }
   });
 });
+app.get('/index.js', function(req, res) {
+  res.sendFile(__dirname + '/index.js', {
+    headers: {
+      'content-type': 'text/javascript'
+    }
+  });
+});
 app.get('/style.css', function(req, res) {
   res.sendFile(__dirname + '/style.css', {
     headers: {

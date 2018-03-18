@@ -6,37 +6,10 @@
     <title>Whiteboard Demo</title>
 </head>
 <body>
+    <div id="board-mount"></div>
     <div class="grid">
         <div class="col-7">
             <h1 id="status">No one is drawing.</h1>
-        </div>
-    </div>
-    <div class="grid">
-        <div class="col-3">
-            <label>NAME</label>
-        </div>
-        <div class="col-3">
-            <input type="text" name="name" id="name" value="YOURNAME" />
-        </div>
-    </div>
-    <div class="grid">
-        <div class="col-7">
-            <canvas></canvas>
-        </div>
-    </div>
-    <div class="grid">
-        <div class="col-5">
-            <div class="color" data-color="red"></div>
-            <div class="color" data-color="orange"></div>
-            <div class="color" data-color="yellow"></div>
-            <div class="color" data-color="green"></div>
-            <div class="color" data-color="blue"></div>
-            <div class="color" data-color="purple"></div>
-            <div class="color" data-color="black"></div>
-            <div class="color" data-color="white"></div>
-        </div>
-        <div class="col-3">
-            <button type="button" id="clear-button">Clear Whiteboard</button>
         </div>
     </div>
     <div class="grid">
@@ -52,76 +25,7 @@
             </p>
         </div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="ws_whiteboard.js"></script>
-    <script>
-        var socket = io();
-        var whiteboard = new WsWhiteboard(socket);
-
-        $('div.color').on('click', function() {
-          var color = $(this).data('color');
-          whiteboard.setPenWidth(whiteboard, 1);
-          switch(color) {
-            case 'red':
-              whiteboard.setColor(whiteboard, {
-                r: 255,
-                g: 0,
-                b: 0
-              });
-              break;
-            case 'orange':
-              whiteboard.setColor(whiteboard, {
-                r: 255,
-                g: 140,
-                b: 0
-              });
-              break;
-            case 'yellow':
-              whiteboard.setColor(whiteboard, {
-                r: 255,
-                g: 255,
-                b: 0
-              });
-              break;
-            case 'green':
-              whiteboard.setColor(whiteboard, {
-                r: 0,
-                g: 187,
-                b: 0
-              });
-              break;
-            case 'blue':
-              whiteboard.setColor(whiteboard,{
-                r: 0,
-                g: 0,
-                b: 187
-              });
-              break;
-            case 'purple':
-              whiteboard.setColor(whiteboard,{
-                r: 128,
-                g: 0,
-                b: 128
-              });
-              break;
-            case 'black':
-              whiteboard.setColor(whiteboard, {
-                r: 0,
-                g: 0,
-                b: 0
-              });
-              break;
-            case 'white':
-              whiteboard.setColor(whiteboard, {
-                r: 255,
-                g: 255,
-                b: 255
-              });
-              whiteboard.setPenWidth(whiteboard, 8);
-              break;
-          }
-        });
-    </script>
+    <script src="index.js"></script>
 </body>
 </html>
