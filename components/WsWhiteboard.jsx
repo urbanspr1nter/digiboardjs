@@ -62,7 +62,7 @@ export default class WsWhiteboard extends React.Component {
             x: 0,
             y: 0,
             statusMessage: 'No one is drawing.'
-        })
+        });
     }
 
     mouseMove(event) {
@@ -162,37 +162,53 @@ export default class WsWhiteboard extends React.Component {
             }, () => {
                 this.state.canvasContext.strokeStyle = this.getRgbCss(this.state.penColor);
                 this.state.canvasContext.lineWidth = this.state.penWidth;
+
+                this.props.socket.on('receive', (data) => {
+                    data = JSON.parse(data);
+        
+                    const red = parseInt(data.color.r);
+                    const green = parseInt(data.color.g);
+                    const blue = parseInt(data.color.b);
+        
+                    const callback = () => {
+                        this.state.canvasContext.strokeStyle = this.getRgbCss({
+                            r: red,
+                            g: green,
+                            b: blue
+                        });
+            
+                        if(data.type === 'move') {
+                            this.state.canvasContext.beginPath();
+                            this.state.canvasContext.moveTo(data.x, data.y);
+                        } else {
+                            this.state.canvasContext.lineTo(data.x, data.y);
+                            this.state.canvasContext.stroke();
+                        }
+                    }
+        
+                    if(red === 255 && green === 255 && blue === 255) {
+                        this.setState({
+                            penWidth: 8
+                        }, () => {
+                            callback();
+                        });
+                    } else {
+                        this.setState({
+                            penWidth: 1
+                        }, () => {
+                            callback();
+                        })
+                    }
+                });
+        
+                this.props.socket.on('clear', (data) => {
+                    this.state.canvasContext.fillStyle = 'rgb(255, 255, 255)';
+                    this.state.canvasContext.fillRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
+        
+                    this.state.canvasContext.beginPath();
+                    this.state.canvasContext.moveTo(0, 0);
+                });
             });
-        });
-
-        this.props.socket.on('receive', (data) => {
-            data = JSON.parse(data);
-
-            const red = parseInt(data.color.r);
-            const green = parseInt(data.color.g);
-            const blue = parseInt(data.color.b);
-
-            this.state.canvasContext.strokeStyle = this.getRgbCss({
-                r: red,
-                g: green,
-                b: blue
-            });
-
-            if(data.type === 'move') {
-                this.state.canvasContext.beginPath();
-                this.state.canvasContext.moveTo(data.x, data.y);
-            } else {
-                this.state.canvasContext.lineTo(data.x, data.y);
-                this.state.canvasContext.stroke();
-            }
-        });
-
-        this.props.socket.on('clear', (data) => {
-            this.state.canvasContext.fillStyle = 'rgb(255, 255, 255)';
-            this.state.canvasContext.fillRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
-
-            this.state.canvasContext.beginPath();
-            this.state.canvasContext.moveTo(0, 0);
         });
     }
 
@@ -261,6 +277,14 @@ export default class WsWhiteboard extends React.Component {
         }
     }
 
+    changeName() {
+        const newUser = Object.assign({}, this.state.user);
+        newUser.name = document.getElementById('name').value;
+
+        this.setState({
+            user: newUser
+        });
+    }
     render() {
         const sessionId = this.props.sessionId === '' ? 'New Session' : `Session ID: ${this.props.sessionId}`;
 
