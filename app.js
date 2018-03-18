@@ -34,14 +34,6 @@ app.get('/alexa-grid.css', function(req, res) {
     }
   });
 });
-app.get('/ws_whiteboard.js', function(req, res) {
-  res.sendFile(__dirname + '/ws_whiteboard.js', {
-    headers: {
-      'content-type': 'text/javascript'
-    }
-  });
-});
-
 
 io.on('connection', function(socket){
   socket.on('push', function(msg){

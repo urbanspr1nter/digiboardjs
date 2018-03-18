@@ -67,9 +67,6 @@ export default class WsWhiteboard extends React.Component {
 
     mouseMove(event) {
         const e = event;
-
-        event.preventDefault();
-
         if(this.state.mouseClicked) {
             const currX = Math.floor(e.pageX - this.state.canvas.offsetLeft);
             const currY = Math.floor(e.pageY - this.state.canvas.offsetTop);
@@ -180,11 +177,11 @@ export default class WsWhiteboard extends React.Component {
                         if(data.type === 'move') {
                             this.state.canvasContext.beginPath();
                             this.state.canvasContext.moveTo(data.x, data.y);
-                        } else {
+                        } else if(data.type === 'draw') {
                             this.state.canvasContext.lineTo(data.x, data.y);
                             this.state.canvasContext.stroke();
                         }
-                    }
+                    };
         
                     if(red === 255 && green === 255 && blue === 255) {
                         this.setState({
