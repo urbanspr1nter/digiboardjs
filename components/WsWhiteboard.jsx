@@ -162,6 +162,10 @@ export default class WsWhiteboard extends React.Component {
 
                 this.props.socket.on('receive', (data) => {
                     data = JSON.parse(data);
+
+                    if(data.name === this.state.user.name) {
+                        return;
+                    }
         
                     const red = parseInt(data.color.r);
                     const green = parseInt(data.color.g);
@@ -298,7 +302,7 @@ export default class WsWhiteboard extends React.Component {
                         <label>Name</label>
                     </div>
                     <div className='col-3'>
-                        <input type='text' name='name' id='name' defaultValue='YOUR NAME' />
+                        <input onBlur={this.changeName.bind(this)} type='text' name='name' id='name' defaultValue='YOUR NAME' />
                     </div>
                 </div>
                 <div className='grid'>
