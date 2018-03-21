@@ -36,12 +36,22 @@ app.get('/alexa-grid.css', function(req, res) {
 });
 
 io.on('connection', function(socket){
+  socket.on('room', function(msg) {
+    const data = JSON.parse(msg);
+    console.log('Joining room', data);
+    socket.join(data.sessionId);
+  });
+
   socket.on('push', function(msg){
-    io.emit('receive', msg);
+    const data = JSON.parse(msg);
+    console.log('Pushing for', data.sessionId);
+    io.in(data.sessionId).emit('receive', msg);
   });
 
   socket.on('clear', function(msg) {
-    io.emit('clear', msg);
+    const data = JSON.parse(msg);
+    console.log('Clearing for', data.sessionId);
+    io.in(data.sessionId).emit('clear', msg);
   });
 });
 

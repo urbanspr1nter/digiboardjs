@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import WsWhiteboard from './components/WsWhiteboard.jsx';
+import io from 'socket.io-client';
 
-const socket = require('socket.io-client')();
+const uuidv4 = require('uuid/v4');
 
 const overlay = document.getElementById('overlay');
 const prompt = document.getElementById('prompt');
@@ -12,10 +13,14 @@ const toggleOverlayAndPrompt = () => {
     prompt.style.display = 'none';
 };
 
+const socket = io();
+
 const newSessionButton = document.getElementById('new-session');
 newSessionButton.addEventListener('click', () => {
+    const sessionId = uuidv4();
+    socket.emit('room', JSON.stringify({sessionId: sessionId}));
     ReactDOM.render(
-        <WsWhiteboard socket={socket} width={640} height={640} sessionId={''} />, 
+        <WsWhiteboard socket={socket} width={640} height={640} sessionId={sessionId} />, 
         document.getElementById('board-mount')
     );
     toggleOverlayAndPrompt();
@@ -27,6 +32,7 @@ joinSessionButton.addEventListener('click', () => {
     if(joinSessionId.value === '') {
         return;
     }
+    socket.emit('room', JSON.stringify({sessionId: joinSessionId.value}));
     ReactDOM.render(
         <WsWhiteboard socket={socket} width={640} height={640} sessionId={joinSessionId.value} />, 
         document.getElementById('board-mount')

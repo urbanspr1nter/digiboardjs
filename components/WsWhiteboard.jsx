@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 export default class WsWhiteboard extends React.Component {
     constructor(props) {
         super(props);
@@ -47,7 +48,8 @@ export default class WsWhiteboard extends React.Component {
                     r: this.state.penColor.r,
                     g: this.state.penColor.g,
                     b: this.state.penColor.b
-                }
+                },
+                sessionId: this.props.sessionId
             });
 
             // socket emit
@@ -87,7 +89,8 @@ export default class WsWhiteboard extends React.Component {
                         g: this.state.penColor.g,
                         b: this.state.penColor.b
                     },
-                    name: this.state.user.name
+                    name: this.state.user.name,
+                    sessionId: this.props.sessionId
                 });
 
                 this.props.socket.emit('push', data);
@@ -102,7 +105,8 @@ export default class WsWhiteboard extends React.Component {
         this.props.socket.emit('clear', JSON.stringify({
             type: 'clear',
             x: 0,
-            y: 0
+            y: 0,
+            sessionId: this.props.sessionId
         }));
     }
 
@@ -162,29 +166,30 @@ export default class WsWhiteboard extends React.Component {
 
                 this.props.socket.on('receive', (data) => {
                     data = JSON.parse(data);
-
-                    if(data.name === this.state.user.name) {
-                        return;
-                    }
         
                     const red = parseInt(data.color.r);
                     const green = parseInt(data.color.g);
                     const blue = parseInt(data.color.b);
         
                     const callback = () => {
-                        this.state.canvasContext.strokeStyle = this.getRgbCss({
-                            r: red,
-                            g: green,
-                            b: blue
+                        this.setState({
+                            statusMessage: `${data.name} is drawing.`
+                        }, () => {
+                            this.state.canvasContext.strokeStyle = this.getRgbCss({
+                                r: red,
+                                g: green,
+                                b: blue
+                            });
+                
+                            if(data.type === 'move') {
+                                this.state.canvasContext.beginPath();
+                                this.state.canvasContext.moveTo(data.x, data.y);
+                            } else if(data.type === 'draw') {
+                                this.state.canvasContext.lineTo(data.x, data.y);
+                                this.state.canvasContext.stroke();
+                            }
                         });
-            
-                        if(data.type === 'move') {
-                            this.state.canvasContext.beginPath();
-                            this.state.canvasContext.moveTo(data.x, data.y);
-                        } else if(data.type === 'draw') {
-                            this.state.canvasContext.lineTo(data.x, data.y);
-                            this.state.canvasContext.stroke();
-                        }
+
                     };
         
                     if(red === 255 && green === 255 && blue === 255) {
