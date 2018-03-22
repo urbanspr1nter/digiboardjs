@@ -13,6 +13,11 @@ app.get('/', function(req, res) {
     }
   });
 });
+app.get('/join', function(req, res) {
+  const sessionId = req.query.sid;
+  console.log(sessionId);
+  res.send(sessionId);
+});
 app.get('/index.js', function(req, res) {
   res.sendFile(__dirname + '/index.js', {
     headers: {

@@ -1,6 +1,5 @@
 import React from 'react';
 
-
 export default class WsWhiteboard extends React.Component {
     constructor(props) {
         super(props);
@@ -296,41 +295,49 @@ export default class WsWhiteboard extends React.Component {
         return (
             <div>
                 <div className='grid'>
-                    <div className='col-7'>
-                        <h1>{this.state.statusMessage}</h1>
+                    <div className='col-12'>
+                        <h2>{this.state.statusMessage}</h2>
                         <h5>{sessionId}</h5>
                     </div>
                 </div>
                 <div className='grid'>
-                    <div className='col-3'>
+                    <div className='col-2'>
                         <label>Name</label>
                     </div>
-                    <div className='col-3'>
-                        <input onBlur={this.changeName.bind(this)} type='text' name='name' id='name' defaultValue='YOUR NAME' />
+                    <div className='col-2'>
+                        <input onChange={this.changeName.bind(this)} type='text' name='name' id='name' defaultValue='YOUR NAME' />
                     </div>
                 </div>
                 <div className='grid'>
-                    <div className='col-7'>
+                    <div className='col-12'>
                         <canvas id='mainCanvas' 
                             onMouseDown={this.mouseDown.bind(this)} 
                             onMouseUp={this.mouseUp.bind(this)} 
-                            onMouseMove={this.mouseMove.bind(this)}>
+                            onMouseMove={this.mouseMove.bind(this)}
+                            onTouchStart={this.mouseDown}
+                            onTouchMove={this.mouseMove}
+                            onTouchEnd={this.mouseUp}
+                        >
                         </canvas>
                     </div>
                 </div>
-                <div className='grid'>
-                    <div className='col-5'>
-                        <div className='color' data-color='red' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='orange' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='yellow' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='green' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='blue' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='purple' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='black' onClick={this.addPaletteHandlers}></div>
-                        <div className='color' data-color='white' onClick={this.addPaletteHandlers}></div>
+                <div className='control-panel'>
+                    <div className='grid'>
+                        <div className='col-12'>
+                            <div className='color' data-color='red' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='orange' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='yellow' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='green' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='blue' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='purple' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='black' onClick={this.addPaletteHandlers}></div>
+                            <div className='color' data-color='white' onClick={this.addPaletteHandlers}></div>
+                        </div>
                     </div>
-                    <div className="col-3">
-                        <button type="button" id="clear-button" onClick={this.clearHandler}>Clear Whiteboard</button>
+                    <div className='grid'>
+                        <div className='col-12'>
+                            <button type="button" id="clear-button" onClick={this.clearHandler}>Clear Whiteboard</button>
+                        </div>
                     </div>
                 </div>
             </div>
