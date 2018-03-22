@@ -99,9 +99,6 @@ export default class WsWhiteboard extends React.Component {
     }
 
     clearHandler() {
-        this.state.canvasContext.fillStyle = 'rgb(255, 255, 255)';
-        this.state.canvasContext.fillRect(0, 0, this.state.canvasContext.width, this.state.canvasContext.height);
-
         this.props.socket.emit('clear', JSON.stringify({
             type: 'clear',
             x: 0,
@@ -175,18 +172,20 @@ export default class WsWhiteboard extends React.Component {
                         this.setState({
                             statusMessage: `${data.name} is drawing.`
                         }, () => {
-                            this.state.canvasContext.strokeStyle = this.getRgbCss({
-                                r: red,
-                                g: green,
-                                b: blue
-                            });
-                
                             if(data.type === 'move') {
                                 this.state.canvasContext.beginPath();
                                 this.state.canvasContext.moveTo(data.x, data.y);
                             } else if(data.type === 'draw') {
+                                const originalPenColor = this.state.canvasContext.strokeStyle;
+                                this.state.canvasContext.strokeStyle = this.getRgbCss({
+                                    r: red,
+                                    g: green,
+                                    b: blue
+                                });
+
                                 this.state.canvasContext.lineTo(data.x, data.y);
                                 this.state.canvasContext.stroke();
+                                this.state.canvasContext.strokeStyle = originalPenColor;
                             }
                         });
 

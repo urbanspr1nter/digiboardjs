@@ -46,14 +46,12 @@ io.on('connection', function(socket){
     const data = JSON.parse(msg);
     console.log('Pushing for', data.sessionId);
     socket.broadcast.to(data.sessionId).emit('receive', msg);
-    //io.in(data.sessionId).emit('receive', msg);
   });
 
   socket.on('clear', function(msg) {
     const data = JSON.parse(msg);
     console.log('Clearing for', data.sessionId);
-    socket.broadcast.to(data.sessionId).emit('clear', msg);
-    //io.in(data.sessionId).emit('clear', msg);
+    io.in(data.sessionId).emit('clear', msg);
   });
 });
 
