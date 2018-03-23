@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const Session = require('./models/sessions');
+const Trace = require('./models/traces');
 
 mongoose.connect(config.db, {
   auth: {
@@ -21,7 +23,6 @@ app.get('/', function(req, res) {
   });
 });
 app.post('/create', function(req, res) {
-  const Session = require('./models/sessions');
   const instance = new Session();
   instance.sessionId = '12345';
   instance.save();
@@ -61,18 +62,33 @@ io.on('connection', function(socket){
     const data = JSON.parse(msg);
     console.log('Joining room', data);
     socket.join(data.sessionId);
+
+    const sessionModel = new Session();
+    sessionModel.sessionId = data.sessionId;
+    sessionModel.save();
   });
 
   socket.on('push', function(msg){
     const data = JSON.parse(msg);
     console.log('Pushing for', data.sessionId);
     socket.broadcast.to(data.sessionId).emit('receive', msg);
+
+    const traceModel = new Trace();
+    traceModel.sessionId = data.sessionId;
+    traceModel.data = data;
+    traceModel.save();
   });
 
   socket.on('clear', function(msg) {
     const data = JSON.parse(msg);
     console.log('Clearing for', data.sessionId);
     io.in(data.sessionId).emit('clear', msg);
+
+    const traceQuery = Trace.deleteMany({
+      sessionId: data.sessionId
+    }).then((rest) => {
+      console.log(rest);
+    });
   });
 });
 
