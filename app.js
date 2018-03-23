@@ -1,10 +1,17 @@
 const config = require('config-node')({
   env: 'development'
 });
+const mongoose = require('mongoose');
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+mongoose.connect(config.db, {
+  auth: {
+    user: config.dbUsername,
+    password: config.dbPassword
+  }
+});
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html', {
@@ -13,6 +20,15 @@ app.get('/', function(req, res) {
     }
   });
 });
+app.post('/create', function(req, res) {
+  const Session = require('./models/sessions');
+  const instance = new Session();
+  instance.sessionId = '12345';
+  instance.save();
+
+  res.send('OK');
+});
+
 app.get('/join', function(req, res) {
   const sessionId = req.query.sid;
   console.log(sessionId);
