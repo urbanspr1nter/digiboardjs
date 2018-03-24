@@ -30,10 +30,23 @@ app.post('/create', function(req, res) {
   res.send('OK');
 });
 
-app.get('/join', function(req, res) {
+app.get('/traces', function(req, res) {
   const sessionId = req.query.sid;
-  console.log(sessionId);
-  res.send(sessionId);
+  const traces = Trace.find({ sessionId: sessionId }).sort({ sequence: 'asc'});
+
+  const data = [];
+  const promise = new Promise((resolve, reject) => {
+      traces.then((coll) => { 
+        coll.forEach((m) => {
+          data.push(m);
+        });
+        resolve();
+      })
+  });
+
+  promise.then((result) => {
+    res.send(JSON.stringify(data));
+  });
 });
 app.get('/index.js', function(req, res) {
   res.sendFile(__dirname + '/index.js', {
@@ -76,6 +89,7 @@ io.on('connection', function(socket){
     const traceModel = new Trace();
     traceModel.sessionId = data.sessionId;
     traceModel.data = data;
+    traceModel.sequence = data.sequence;
     traceModel.save();
   });
 

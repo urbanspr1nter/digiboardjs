@@ -9,6 +9,7 @@ export default class WsWhiteboard extends React.Component {
 
         this.state = {
             sessionId: this.props.sessionId,
+            sequence: 0,
             canvasWidth: this.props.width,
             canvasHeight: this.props.height,
             canvas: null,
@@ -48,11 +49,16 @@ export default class WsWhiteboard extends React.Component {
                     g: this.state.penColor.g,
                     b: this.state.penColor.b
                 },
-                sessionId: this.props.sessionId
+                sessionId: this.props.sessionId,
+                sequence: this.state.sequence
             });
 
             // socket emit
-            this.props.socket.emit('push', data);
+            this.setState({
+                sequence: this.state.sequence + 1
+            }, () => {
+                this.props.socket.emit('push', data);
+            });
         });
     }
 
@@ -89,10 +95,16 @@ export default class WsWhiteboard extends React.Component {
                         b: this.state.penColor.b
                     },
                     name: this.state.user.name,
-                    sessionId: this.props.sessionId
+                    sessionId: this.props.sessionId,
+                    sequence: this.state.sequence
                 });
 
-                this.props.socket.emit('push', data);
+                // socket emit
+                this.setState({
+                    sequence: this.state.sequence + 1
+                }, () => {
+                    this.props.socket.emit('push', data);
+                });
             });
         }
     }
@@ -147,6 +159,35 @@ export default class WsWhiteboard extends React.Component {
     }
 
     componentDidMount() {
+        fetch(`/traces?sid=${this.state.sessionId}`).then((response) => {
+            return response.json();
+        }).then((response) => {
+            const traces = response;
+            for(let i = 0; i < traces.length; i++) {
+                const element = traces[i];
+                const data = element.data;
+                if(data.type === 'move') {
+                    this.state.canvasContext.beginPath();
+                    this.state.canvasContext.moveTo(data.x, data.y);
+                } else if(data.type === 'draw') {
+                    const red = parseInt(data.color.r);
+                    const green = parseInt(data.color.g);
+                    const blue = parseInt(data.color.b);
+
+                    const originalPenColor = this.state.canvasContext.strokeStyle;
+                    this.state.canvasContext.strokeStyle = this.getRgbCss({
+                        r: red,
+                        g: green,
+                        b: blue
+                    });
+
+                    this.state.canvasContext.lineTo(data.x, data.y);
+                    this.state.canvasContext.stroke();
+                    this.state.canvasContext.strokeStyle = originalPenColor;
+                }
+            }
+        });
+
         this.setState({
             canvas: document.getElementById('mainCanvas')
         }, () => {
@@ -169,7 +210,8 @@ export default class WsWhiteboard extends React.Component {
         
                     const callback = () => {
                         this.setState({
-                            statusMessage: `${data.name} is drawing.`
+                            statusMessage: `${data.name} is drawing.`,
+                            sequence: data.sequence
                         }, () => {
                             if(data.type === 'move') {
                                 this.state.canvasContext.beginPath();
