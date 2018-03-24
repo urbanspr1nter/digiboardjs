@@ -44,7 +44,7 @@ joinSessionButton.addEventListener('click', () => {
 
 let params = (new URL(document.location)).searchParams;
 let sid = params.get("sid");
-if(sid.length !== 0) {
+if(sid !== null && sid.length !== 0) {
     joinSessionId.value = sid;
     joinSessionButton.click();
 }

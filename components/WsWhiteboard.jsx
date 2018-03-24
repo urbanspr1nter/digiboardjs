@@ -7,6 +7,10 @@ export default class WsWhiteboard extends React.Component {
     constructor(props) {
         super(props);
 
+        this.mouseMove = this.mouseMove.bind(this);
+        this.mouseDown = this.mouseDown.bind(this);
+        this.mouseUp = this.mouseUp.bind(this);
+
         this.state = {
             sessionId: this.props.sessionId,
             sequence: 0,
@@ -75,7 +79,6 @@ export default class WsWhiteboard extends React.Component {
     mouseMove(event) {
         const e = event;
         e.preventDefault();
-
         if(this.state.mouseClicked) {
             const currX = Math.floor(e.pageX - this.state.canvas.offsetLeft);
             const currY = Math.floor(e.pageY - this.state.canvas.offsetTop);
@@ -215,6 +218,12 @@ export default class WsWhiteboard extends React.Component {
         this.setState({
             canvas: document.getElementById('mainCanvas')
         }, () => {
+            const theCanvas = document.getElementById('mainCanvas');
+
+            theCanvas.addEventListener('touchstart', (e) => this.mouseDown(e), false);
+            theCanvas.addEventListener('touchmove', (e) => this.mouseMove(e), false);
+            theCanvas.addEventListener('touchend', (e) => this.mouseUp(e), false);
+
             this.state.canvas.width = this.state.canvasWidth;
             this.state.canvas.height = this.state.canvasHeight;
 
@@ -316,12 +325,10 @@ export default class WsWhiteboard extends React.Component {
                 </div>
                 <div className='digiboard_canvas-container'>
                     <canvas id='mainCanvas' 
-                        onMouseDown={this.mouseDown.bind(this)} 
-                        onMouseUp={this.mouseUp.bind(this)} 
-                        onMouseMove={this.mouseMove.bind(this)}
-                        onTouchStart={this.mouseDown.bind(this)}
-                        onTouchMove={this.mouseMove}
-                        onTouchEnd={this.mouseUp}>
+                        onMouseDown={this.mouseDown} 
+                        onMouseUp={this.mouseUp} 
+                        onMouseMove={this.mouseMove}
+                    >
                     </canvas>
                 </div>
                 <PenBoard onClick={this.addPaletteHandlers.bind(this)} />
