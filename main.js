@@ -16,8 +16,8 @@ const toggleOverlayAndPrompt = () => {
 const socket = io();
 
 const newSessionButton = document.getElementById('new-session');
-const defaultWidth = 360;
-const defaultHeight = 640;
+const defaultWidth = 355;
+const defaultHeight = 512;
 
 newSessionButton.addEventListener('click', () => {
     const sessionId = uuidv4();

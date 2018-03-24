@@ -6,7 +6,7 @@ var config = {
        path: path.join(__dirname, '/public/'),
        filename: 'index.js',
     },
-    mode: 'development',
+    mode: 'production',
     devServer: {
        inline: true,
        port: 8080

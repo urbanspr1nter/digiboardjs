@@ -4,11 +4,11 @@ const config = require('config-node')({
 
 const mongoose = require('mongoose');
 const express = require('express');
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
 const Session = require('./models/sessions');
 const Trace = require('./models/traces');
 const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 /**
  * Setting up the server.

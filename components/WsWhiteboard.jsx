@@ -1,4 +1,6 @@
 import React from 'react';
+import PenBoard from './PenBoard.jsx';
+import Button from './Button.jsx';
 
 export default class WsWhiteboard extends React.Component {
     constructor(props) {
@@ -28,6 +30,7 @@ export default class WsWhiteboard extends React.Component {
 
     mouseDown(event) {
         const e = event;
+        e.preventDefault();
         const currX = Math.floor(e.pageX - this.state.canvas.offsetLeft);
         const currY = Math.floor(e.pageY - this.state.canvas.offsetTop);
 
@@ -64,6 +67,7 @@ export default class WsWhiteboard extends React.Component {
 
     mouseUp(event) {
         const e = event;
+        e.preventDefault();
         this.setState({
             mouseClicked: false,
             x: 0,
@@ -74,6 +78,7 @@ export default class WsWhiteboard extends React.Component {
 
     mouseMove(event) {
         const e = event;
+        e.preventDefault();
         if(this.state.mouseClicked) {
             const currX = Math.floor(e.pageX - this.state.canvas.offsetLeft);
             const currY = Math.floor(e.pageY - this.state.canvas.offsetTop);
@@ -119,15 +124,11 @@ export default class WsWhiteboard extends React.Component {
     }
 
     makeColor() {
-        const r = Math.round(Math.random() * 75 + 100);
-        const g = Math.round(Math.random() * 100 + 100);
-        const b = Math.round(Math.random() * 75 + 100);
+        const red = Math.round(Math.random() * 75 + 100);
+        const green = Math.round(Math.random() * 100 + 100);
+        const blue = Math.round(Math.random() * 75 + 100);
 
-        return {
-            r: r,
-            g: g,
-            b: b
-        };
+        return { r: red, g: green, b: blue };
     }
 
     setColor(color, callback) {
@@ -158,6 +159,36 @@ export default class WsWhiteboard extends React.Component {
         return `rgb(${color.r}, ${color.g}, ${color.b})`;
     }
 
+    clear(data) {
+        this.state.canvasContext.fillStyle = 'rgb(255, 255, 255)';
+        this.state.canvasContext.fillRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
+
+        this.state.canvasContext.beginPath();
+        this.state.canvasContext.moveTo(0, 0);
+    }
+
+    move(data) {
+        this.state.canvasContext.beginPath();
+        this.state.canvasContext.moveTo(data.x, data.y);
+    }
+
+    draw(data) {
+        const red = parseInt(data.color.r);
+        const green = parseInt(data.color.g);
+        const blue = parseInt(data.color.b);
+
+        const originalPenColor = this.state.canvasContext.strokeStyle;
+        this.state.canvasContext.strokeStyle = this.getRgbCss({
+            r: red,
+            g: green,
+            b: blue
+        });
+
+        this.state.canvasContext.lineTo(data.x, data.y);
+        this.state.canvasContext.stroke();
+        this.state.canvasContext.strokeStyle = originalPenColor;
+    }
+
     componentDidMount() {
         fetch(`/traces?sid=${this.props.sessionId}`).then((response) => {
             return response.json();
@@ -166,25 +197,13 @@ export default class WsWhiteboard extends React.Component {
             for(let i = 0; i < traces.length; i++) {
                 const data = traces[i];
                 if(data.type === 'move') {
-                    this.state.canvasContext.beginPath();
-                    this.state.canvasContext.moveTo(data.x, data.y);
+                    this.move(data);
                 } else if(data.type === 'draw') {
-                    const red = parseInt(data.color.r);
-                    const green = parseInt(data.color.g);
-                    const blue = parseInt(data.color.b);
-
-                    const originalPenColor = this.state.canvasContext.strokeStyle;
-                    this.state.canvasContext.strokeStyle = this.getRgbCss({
-                        r: red,
-                        g: green,
-                        b: blue
-                    });
-
-                    this.state.canvasContext.lineTo(data.x, data.y);
-                    this.state.canvasContext.stroke();
-                    this.state.canvasContext.strokeStyle = originalPenColor;
+                    this.draw(data);
                 }
             }
+        }).then((result) => {
+
         });
 
         this.setState({
@@ -202,33 +221,18 @@ export default class WsWhiteboard extends React.Component {
 
                 this.props.socket.on('receive', (data) => {
                     data = JSON.parse(data);
-        
-                    const red = parseInt(data.color.r);
-                    const green = parseInt(data.color.g);
-                    const blue = parseInt(data.color.b);
-        
+
                     const callback = () => {
                         this.setState({
                             statusMessage: `${data.name} is drawing.`,
                             sequence: data.sequence
                         }, () => {
                             if(data.type === 'move') {
-                                this.state.canvasContext.beginPath();
-                                this.state.canvasContext.moveTo(data.x, data.y);
+                                this.move(data);
                             } else if(data.type === 'draw') {
-                                const originalPenColor = this.state.canvasContext.strokeStyle;
-                                this.state.canvasContext.strokeStyle = this.getRgbCss({
-                                    r: red,
-                                    g: green,
-                                    b: blue
-                                });
-
-                                this.state.canvasContext.lineTo(data.x, data.y);
-                                this.state.canvasContext.stroke();
-                                this.state.canvasContext.strokeStyle = originalPenColor;
+                                this.draw(data);
                             }
                         });
-
                     };
         
                     if(red === 255 && green === 255 && blue === 255) {
@@ -246,13 +250,7 @@ export default class WsWhiteboard extends React.Component {
                     }
                 });
         
-                this.props.socket.on('clear', (data) => {
-                    this.state.canvasContext.fillStyle = 'rgb(255, 255, 255)';
-                    this.state.canvasContext.fillRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
-        
-                    this.state.canvasContext.beginPath();
-                    this.state.canvasContext.moveTo(0, 0);
-                });
+                this.props.socket.on('clear', (data) => { this.clear(data) });
             });
         });
     }
@@ -263,60 +261,28 @@ export default class WsWhiteboard extends React.Component {
         this.setPenWidth(1);
         switch(color) {
             case 'red':
-                this.setColor({
-                    r: 255,
-                    g: 0,
-                    b: 0
-                });
+                this.setColor({ r: 255, g: 0, b: 0 });
                 break;
             case 'orange':
-                this.setColor({
-                    r: 255,
-                    g: 140,
-                    b: 0
-                });
+                this.setColor({ r: 255, g: 140, b: 0 });
                 break;
             case 'yellow':
-                this.setColor({
-                    r: 255,
-                    g: 255,
-                    b: 0
-                });
+                this.setColor({ r: 255, g: 255, b: 0 });
                 break;
             case 'green':
-                this.setColor({
-                    r: 0,
-                    g: 187,
-                    b: 0
-                });
+                this.setColor({ r: 0, g: 187, b: 0 });
                 break;
             case 'blue':
-                this.setColor({
-                    r: 0,
-                    g: 0,
-                    b: 187
-                });
+                this.setColor({ r: 0, g: 0, b: 187 });
                 break;
             case 'purple':
-                this.setColor({
-                    r: 128,
-                    g: 0,
-                    b: 128
-                });
+                this.setColor({ r: 128, g: 0, b: 128 });
                 break;
             case 'black':
-                this.setColor({
-                    r: 0,
-                    g: 0,
-                    b: 0
-                });
+                this.setColor({ r: 0, g: 0, b: 0 });
                 break;
             case 'white':
-                this.setColor({
-                    r: 255,
-                    g: 255,
-                    b: 255
-                });
+                this.setColor({ r: 255, g: 255, b: 255 });
                 this.setPenWidth(8);
                 break;
         }
@@ -330,56 +296,43 @@ export default class WsWhiteboard extends React.Component {
             user: newUser
         });
     }
+
+    aboutHandler() {
+        alert('Concept of a whiteboard using socket.io. by Roger Ngo (rogerngo.com)');
+    }
+
     render() {
         const sessionId = this.props.sessionId === '' ? 'New Session' : `Session ID: ${this.props.sessionId}`;
 
         return (
-            <div>
-                <div className='grid'>
-                    <div className='col-12'>
-                        <h2>{this.state.statusMessage}</h2>
-                        <h5>{sessionId}</h5>
-                    </div>
+            <div className='digiboard_container'>
+                <div className='digiboard_header-container'>
+                    <p>{this.state.statusMessage} / {sessionId}</p>
                 </div>
-                <div className='grid'>
-                    <div className='col-2'>
-                        <label>Name</label>
-                    </div>
-                    <div className='col-2'>
-                        <input onChange={this.changeName.bind(this)} type='text' name='name' id='name' defaultValue='YOUR NAME' />
-                    </div>
+                <div className='digiboard_form-input'>
+                    <label>Name</label>
+                    <input 
+                        onChange={this.changeName.bind(this)} 
+                        type='text' 
+                        name='name' 
+                        id='name' 
+                        defaultValue='YOUR NAME' 
+                    />
                 </div>
-                <div className='grid'>
-                    <div className='col-12'>
-                        <canvas id='mainCanvas' 
-                            onMouseDown={this.mouseDown.bind(this)} 
-                            onMouseUp={this.mouseUp.bind(this)} 
-                            onMouseMove={this.mouseMove.bind(this)}
-                            onTouchStart={this.mouseDown}
-                            onTouchMove={this.mouseMove}
-                            onTouchEnd={this.mouseUp}
-                        >
-                        </canvas>
-                    </div>
+                <div className='digiboard_canvas-container'>
+                    <canvas id='mainCanvas' 
+                        onMouseDown={this.mouseDown.bind(this)} 
+                        onMouseUp={this.mouseUp.bind(this)} 
+                        onMouseMove={this.mouseMove.bind(this)}
+                        onTouchStart={this.mouseDown}
+                        onTouchMove={this.mouseMove}
+                        onTouchEnd={this.mouseUp}>
+                    </canvas>
                 </div>
+                <PenBoard onClick={this.addPaletteHandlers} />
                 <div className='control-panel'>
-                    <div className='grid'>
-                        <div className='col-12'>
-                            <div className='color' data-color='red' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='orange' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='yellow' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='green' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='blue' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='purple' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='black' onClick={this.addPaletteHandlers}></div>
-                            <div className='color' data-color='white' onClick={this.addPaletteHandlers}></div>
-                        </div>
-                    </div>
-                    <div className='grid'>
-                        <div className='col-12'>
-                            <button type="button" id="clear-button" onClick={this.clearHandler}>Clear Whiteboard</button>
-                        </div>
-                    </div>
+                    <Button label='Clear Whiteboard' onClick={this.clearHandler} />
+                    <Button label='About' onClick={this.aboutHandler} />
                 </div>
             </div>
         );

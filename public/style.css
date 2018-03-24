@@ -8,20 +8,20 @@ label {
     display: inline;
 }
 input {
+    margin: 0 0 4px 0;
     min-width: 192px;
     max-width: 192px;
     display: inline;
     padding-left: 4px;
     font-size: large;
-    margin-left: 8px;
     border: 1px solid #999999;
 }
 input:focus {
     border: 2px solid beige;
 }
 button {
-    height: 36px;
-    min-width: 128px;
+    padding: 4px 0 4px 0;
+    min-width: 132px;
     font-size: medium;
     background-color: blanchedalmond;
     box-shadow: none;
@@ -34,12 +34,61 @@ button:hover {
 }
 canvas {
     border: 2px solid blanchedalmond;
-    width: 360px;
-    height: 640px;
-    box-shadow: 2px 3px 2px 3px #eaeaea;
+    width: 355px;
+    height: 512px;
+    margin-bottom: 4px;
 }
 canvas:hover {
     cursor: pointer;
+}
+
+.digiboard_about {
+    font-size: smaller;
+    margin-top: 4px;
+}
+
+.digiboard_container {
+    display: flex;
+    overflow-x: hidden;
+    flex-direction: column;
+    width: 100%;
+    margin-right: 8px;
+}
+
+.digiboard_canvas-container {
+    flex: 1;
+}
+
+.digiboard_control-panel-container {
+    display: inline;
+}
+
+.digiboard_control-panel-container color {
+    flex: -1;
+}
+
+.digiboard_header-container {
+    flex: 1;
+}
+
+.digiboard_header-container p {
+    margin: 0 8px 0 8px;
+    font-size: x-small;
+}
+
+.digiboard_form-input {
+    display: flex;
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.digiboard_form-input label {
+    margin-left: 8px;
+    flex: -1;
+}
+.digiboard_form-input input {
+    margin-left: 8px;
+    flex: 1;
 }
 
 div.color {

@@ -1,42 +1,30 @@
 <!doctype html>
 <html>
-<head>
-    <link rel="stylesheet" href="style.css" type="text/css" />
-    <link rel="stylesheet" href="alexa-grid.css" type="text/css" />
-    <title>Whiteboard Demo</title>
-</head>
-<body>
-    <div id="overlay" class="session-prompt-overlay"></div>
-    <div id="prompt" class="session-prompt">
-        <div>
-            What do you want to do?
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <link rel="stylesheet" href="style.css" type="text/css" />
+        <link rel="stylesheet" href="alexa-grid.css" type="text/css" />
+        <title>Whiteboard Demo</title>
+    </head>
+    <body>
+        <div id="overlay" class="session-prompt-overlay"></div>
+        <div id="prompt" class="session-prompt">
+            <div>
+                What do you want to do?
+            </div>
+            <div>
+                <button id="new-session" type="button">New Session</button>
+            </div>
+            <div>
+                Or, join an existing session.
+            </div>
+            <div>
+                <label>Session ID</label>
+                <input id="join-session-id" name="join-session-id" type="text" />
+                <button id="join-session" type="button">Join</button>
+            </div>
         </div>
-        <div>
-            <button id="new-session" type="button">New Session</button>
-        </div>
-        <div>
-            Or, join an existing session.
-        </div>
-        <div>
-            <label>Session ID</label>
-            <input id="join-session-id" name="join-session-id" type="text" />
-            <button id="join-session" type="button">Join</button>
-        </div>
-    </div>
-    <div id="board-mount"></div>
-    <div class="grid">
-        <div class="col-3">
-            <h3>ABOUT</h3>
-        </div>
-        <div class="col-12">
-            <p>
-                Concept of a whiteboard using WebSockets.
-            </p>
-            <p>
-                Roger Ngo<br/> rogerngo.com
-            </p>
-        </div>
-    </div>
-    <script src="index.js"></script>
-</body>
+        <div id="board-mount"></div>
+        <script src="index.js"></script>
+    </body>
 </html>
