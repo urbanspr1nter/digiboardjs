@@ -1,4 +1,5 @@
 import React from 'react';
+import Colors from './lib/Colors';
 import PenBoard from './PenBoard.jsx';
 import Button from './Button.jsx';
 
@@ -123,19 +124,11 @@ export default class WsWhiteboard extends React.Component {
         }));
     }
 
-    makeColor() {
-        const red = Math.round(Math.random() * 75 + 100);
-        const green = Math.round(Math.random() * 100 + 100);
-        const blue = Math.round(Math.random() * 75 + 100);
-
-        return { r: red, g: green, b: blue };
-    }
-
     setColor(color, callback) {
         this.setState({
             penColor: color
         }, () => {
-            this.state.canvasContext.strokeStyle = this.getRgbCss(this.state.penColor);
+            this.state.canvasContext.strokeStyle = Colors.getRgbCss(this.state.penColor);
 
             if(typeof callback !== 'undefined') {
                 callback();
@@ -153,10 +146,6 @@ export default class WsWhiteboard extends React.Component {
                 callback();
             }
         });
-    }
-
-    getRgbCss(color) {
-        return `rgb(${color.r}, ${color.g}, ${color.b})`;
     }
 
     clear(data) {
@@ -178,7 +167,7 @@ export default class WsWhiteboard extends React.Component {
         const blue = parseInt(data.color.b);
 
         const originalPenColor = this.state.canvasContext.strokeStyle;
-        this.state.canvasContext.strokeStyle = this.getRgbCss({
+        this.state.canvasContext.strokeStyle = Colors.getRgbCss({
             r: red,
             g: green,
             b: blue
@@ -214,9 +203,9 @@ export default class WsWhiteboard extends React.Component {
 
             this.setState({
                 canvasContext: this.state.canvas.getContext('2d'),
-                penColor: this.makeColor()
+                penColor: { r: 0, g: 0, b: 0 }
             }, () => {
-                this.state.canvasContext.strokeStyle = this.getRgbCss(this.state.penColor);
+                this.state.canvasContext.strokeStyle = Colors.getRgbCss(this.state.penColor);
                 this.state.canvasContext.lineWidth = this.state.penWidth;
 
                 this.props.socket.on('receive', (data) => {
@@ -261,28 +250,28 @@ export default class WsWhiteboard extends React.Component {
         this.setPenWidth(1);
         switch(color) {
             case 'red':
-                this.setColor({ r: 255, g: 0, b: 0 });
+                this.setColor(Colors.Red);
                 break;
             case 'orange':
-                this.setColor({ r: 255, g: 140, b: 0 });
+                this.setColor(Colors.Orange);
                 break;
             case 'yellow':
-                this.setColor({ r: 255, g: 255, b: 0 });
+                this.setColor(Colors.Yellow);
                 break;
             case 'green':
-                this.setColor({ r: 0, g: 187, b: 0 });
+                this.setColor(Colors.Green);
                 break;
             case 'blue':
-                this.setColor({ r: 0, g: 0, b: 187 });
+                this.setColor(Colors.Blue);
                 break;
             case 'purple':
-                this.setColor({ r: 128, g: 0, b: 128 });
+                this.setColor(Colors.Purple);
                 break;
             case 'black':
-                this.setColor({ r: 0, g: 0, b: 0 });
+                this.setColor(Colors.Black);
                 break;
             case 'white':
-                this.setColor({ r: 255, g: 255, b: 255 });
+                this.setColor(Colors.White);
                 this.setPenWidth(8);
                 break;
         }
