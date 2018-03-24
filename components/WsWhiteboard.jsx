@@ -159,13 +159,12 @@ export default class WsWhiteboard extends React.Component {
     }
 
     componentDidMount() {
-        fetch(`/traces?sid=${this.state.sessionId}`).then((response) => {
+        fetch(`/traces?sid=${this.props.sessionId}`).then((response) => {
             return response.json();
         }).then((response) => {
             const traces = response;
             for(let i = 0; i < traces.length; i++) {
-                const element = traces[i];
-                const data = element.data;
+                const data = traces[i];
                 if(data.type === 'move') {
                     this.state.canvasContext.beginPath();
                     this.state.canvasContext.moveTo(data.x, data.y);

@@ -3,7 +3,7 @@ var path = require('path');
 var config = {
     entry: './main.js',
     output: {
-       path: path.join(__dirname, '/'),
+       path: path.join(__dirname, '/public/'),
        filename: 'index.js',
     },
     mode: 'development',

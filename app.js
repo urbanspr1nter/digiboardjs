@@ -1,27 +1,32 @@
 const config = require('config-node')({
   env: 'development'
 });
+
 const mongoose = require('mongoose');
-const app = require('express')();
+const express = require('express');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const Session = require('./models/sessions');
 const Trace = require('./models/traces');
+const app = express();
 
+/**
+ * Setting up the server.
+ */
 mongoose.connect(config.db, {
   auth: {
     user: config.dbUsername,
     password: config.dbPassword
-  }
+  },
+  socketTimeoutMS: 120000,
+  connectTimeoutMS: 60000
 });
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/index.html', {
-    headers: {
-      'content-type': 'text/html'
-    }
-  });
-});
+app.use('/', require('express').static('public'));
+
+/**
+ * Define the API
+ */
 app.post('/create', function(req, res) {
   const instance = new Session();
   instance.sessionId = '12345';
@@ -32,41 +37,36 @@ app.post('/create', function(req, res) {
 
 app.get('/traces', function(req, res) {
   const sessionId = req.query.sid;
-  const traces = Trace.find({ sessionId: sessionId }).sort({ sequence: 'asc'});
-
   const data = [];
   const promise = new Promise((resolve, reject) => {
+      const traces = Trace.find({ sessionId: sessionId }).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
       traces.then((coll) => { 
         coll.forEach((m) => {
-          data.push(m);
+          const mData = m.data;
+          data.push(mData);
         });
         resolve();
-      })
+      });
   });
 
   promise.then((result) => {
+    const traces = Trace.find({ sessionId: sessionId }).skip(1000).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
+    return traces.then((coll) => { 
+      coll.forEach((m) => {
+        const mData = m.data;
+        data.push(mData);
+      });
+    });
+  }).then((result) => {
+    const traces = Trace.find({ sessionId: sessionId }).skip(2000).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
+    return traces.then((coll) => { 
+      coll.forEach((m) => {
+        const mData = m.data;
+        data.push(mData);
+      });
+    });
+  }).then((result) => {
     res.send(JSON.stringify(data));
-  });
-});
-app.get('/index.js', function(req, res) {
-  res.sendFile(__dirname + '/index.js', {
-    headers: {
-      'content-type': 'text/javascript'
-    }
-  });
-});
-app.get('/style.css', function(req, res) {
-  res.sendFile(__dirname + '/style.css', {
-    headers: {
-      'content-type': 'text/css'
-    }
-  });
-});
-app.get('/alexa-grid.css', function(req, res) {
-  res.sendFile(__dirname + '/alexa-grid.css', {
-    headers: {
-      'content-type': 'text/css'
-    }
   });
 });
 
