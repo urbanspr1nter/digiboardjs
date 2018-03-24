@@ -14,13 +14,12 @@ const toggleOverlayAndPrompt = () => {
 };
 
 const socket = io();
-
 const newSessionButton = document.getElementById('new-session');
 const defaultWidth = 355;
 const defaultHeight = 512;
 
 newSessionButton.addEventListener('click', () => {
-    const sessionId = uuidv4();
+    const sessionId = uuidv4().slice(-6);
     socket.emit('room', JSON.stringify({sessionId: sessionId}));
     ReactDOM.render(
         <WsWhiteboard socket={socket} width={defaultWidth} height={defaultHeight} sessionId={sessionId} />, 
@@ -30,8 +29,8 @@ newSessionButton.addEventListener('click', () => {
 });
 
 const joinSessionButton = document.getElementById('join-session');
+const joinSessionId = document.getElementById('join-session-id');
 joinSessionButton.addEventListener('click', () => {
-    const joinSessionId = document.getElementById('join-session-id');
     if(joinSessionId.value === '') {
         return;
     }
@@ -42,3 +41,10 @@ joinSessionButton.addEventListener('click', () => {
     );
     toggleOverlayAndPrompt();
 });
+
+let params = (new URL(document.location)).searchParams;
+let sid = params.get("sid");
+if(sid.length !== 0) {
+    joinSessionId.value = sid;
+    joinSessionButton.click();
+}

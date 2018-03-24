@@ -10,6 +10,10 @@ const Colors = {
 
     getRgbCss: (color) => {
         return `rgb(${color.r}, ${color.g}, ${color.b})`;
+    },
+
+    isEqual: (color1, color2) => {
+        return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
     }
 };
 

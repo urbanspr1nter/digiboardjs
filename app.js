@@ -38,34 +38,28 @@ app.post('/create', function(req, res) {
 app.get('/traces', function(req, res) {
   const sessionId = req.query.sid;
   const data = [];
-  const promise = new Promise((resolve, reject) => {
-      const traces = Trace.find({ sessionId: sessionId }).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
-      traces.then((coll) => { 
-        coll.forEach((m) => {
-          const mData = m.data;
-          data.push(mData);
-        });
-        resolve();
-      });
+  const getTraceCount = new Promise((resolve, reject) => {
+    const count = Trace.count({sessionId: sessionId}).then((result) => {
+      return resolve(result);
+    });
   });
 
-  promise.then((result) => {
-    const traces = Trace.find({ sessionId: sessionId }).skip(1000).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
-    return traces.then((coll) => { 
-      coll.forEach((m) => {
-        const mData = m.data;
-        data.push(mData);
-      });
+  const promises = [];
+  getTraceCount.then((numTraces) => {
+    console.log(`Number of traces for session ${sessionId} - ${numTraces}`);
+    const iterations = (numTraces/ 1000) + 1;
+    for(let i = 0; i < iterations; i++) {
+      promises.push(Trace.find({ sessionId: sessionId }).skip(i * 1000).limit(1000).sort({ sequence: 'asc'}).select('data -_id'));
+    }
+      
+    return Promise.all(promises).then((results) => {
+      return results;
     });
-  }).then((result) => {
-    const traces = Trace.find({ sessionId: sessionId }).skip(2000).limit(1000).sort({ sequence: 'asc'}).select('data -_id');
-    return traces.then((coll) => { 
-      coll.forEach((m) => {
-        const mData = m.data;
-        data.push(mData);
-      });
-    });
-  }).then((result) => {
+  }).then((docs) => {
+    console.log(docs);
+    for(let i = 0; i < docs.length; i++) {
+      data.push(...docs[i]);
+    }
     res.send(JSON.stringify(data));
   });
 });
