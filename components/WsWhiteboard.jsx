@@ -16,6 +16,7 @@ export default class WsWhiteboard extends React.Component {
             sequence: 0,
             canvasWidth: this.props.width,
             canvasHeight: this.props.height,
+            currTraceBatch: [],
             canvas: null,
             canvasContext : null,
             penColor: null,
@@ -59,8 +60,17 @@ export default class WsWhiteboard extends React.Component {
             });
 
             // socket emit
+            let traceBatch = Array.from(this.state.currTraceBatch);
+            traceBatch.push(JSON.parse(data));
+            console.log('PUSHED A TRACE.');
+            if(traceBatch.length === 32) {
+                this.props.socket.emit('batchPush', { sessionId: this.props.sessionId, data: traceBatch, sequence: this.state.sequence});
+                traceBatch = [];
+            }
+
             this.setState({
-                sequence: this.state.sequence + 1
+                sequence: this.state.sequence + 1,
+                currTraceBatch: traceBatch
             }, () => {
                 this.props.socket.emit('push', data);
             });
@@ -105,8 +115,17 @@ export default class WsWhiteboard extends React.Component {
                 });
 
                 // socket emit
+                let traceBatch = Array.from(this.state.currTraceBatch);
+                traceBatch.push(JSON.parse(data));
+                console.log('PUSHED A TRACE.');
+                if(traceBatch.length === 32) {
+                    this.props.socket.emit('batchPush', { sessionId: this.props.sessionId, data: traceBatch, sequence: this.state.sequence});
+                    traceBatch = [];
+                }
+    
                 this.setState({
-                    sequence: this.state.sequence + 1
+                    sequence: this.state.sequence + 1,
+                    currTraceBatch: traceBatch
                 }, () => {
                     this.props.socket.emit('push', data);
                 });
@@ -240,7 +259,7 @@ export default class WsWhiteboard extends React.Component {
                 }).then((response) => {
                     const traces = response;
                     for(let i = 0; i < traces.length; i++) {
-                        const data = traces[i].data;
+                        const data = traces[i];
                         if(data.type === 'move') {
                             this.move(data);
                         } else if(data.type === 'draw') {

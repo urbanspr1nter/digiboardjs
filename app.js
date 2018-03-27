@@ -56,9 +56,10 @@ app.get('/traces', function(req, res) {
       return results;
     });
   }).then((docs) => {
-    console.log(docs);
     for(let i = 0; i < docs.length; i++) {
-      data.push(...docs[i]);
+      if(docs[i].length > 0) {
+        data.push(...docs[i][0].data);
+      }
     }
     res.send(JSON.stringify(data));
   });
@@ -75,16 +76,18 @@ io.on('connection', function(socket){
     sessionModel.save();
   });
 
+  socket.on('batchPush', function(msg) {
+    console.log(">>> BATCH PUSH", msg);
+    const traceModel = new Trace();
+    traceModel.sessionId = msg.sessionId;
+    traceModel.data = msg.data;
+    traceModel.sequence = msg.sequence;
+    traceModel.save();
+  });
+
   socket.on('push', function(msg){
     const data = JSON.parse(msg);
-    console.log('Pushing for', data.sessionId);
     socket.broadcast.to(data.sessionId).emit('receive', msg);
-
-    const traceModel = new Trace();
-    traceModel.sessionId = data.sessionId;
-    traceModel.data = data;
-    traceModel.sequence = data.sequence;
-    traceModel.save();
   });
 
   socket.on('clear', function(msg) {
