@@ -225,6 +225,28 @@ export default class WsWhiteboard extends React.Component {
         this.props.socket.on('clear', (data) => { this.clear(data) });       
     }
 
+    getTraces() {
+        // Initialize the current view for the session.
+        fetch(`/traces?sid=${this.props.sessionId}`).then((response) => {
+            return response.json();
+        }).then((response) => {
+            const traces = response;
+            for(let i = 0; i < traces.length; i++) {
+                const data = traces[i];
+                if(data.type === 'move') {
+                    this.move(data);
+                } else if(data.type === 'draw') {
+                    this.draw(data);
+                }
+            }
+        }).then((result) => {
+            this.attachSocketHandlers();
+
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('hide');
+        });
+    }
+
     componentDidMount() {
         this.changeName();
 
@@ -242,22 +264,7 @@ export default class WsWhiteboard extends React.Component {
                 this.state.canvasContext.strokeStyle = Colors.getRgbCss(this.state.penColor);
                 this.state.canvasContext.lineWidth = this.state.penWidth;
 
-                // Initialize the current view for the session.
-                fetch(`/traces?sid=${this.props.sessionId}`).then((response) => {
-                    return response.json();
-                }).then((response) => {
-                    const traces = response;
-                    for(let i = 0; i < traces.length; i++) {
-                        const data = traces[i];
-                        if(data.type === 'move') {
-                            this.move(data);
-                        } else if(data.type === 'draw') {
-                            this.draw(data);
-                        }
-                    }
-                }).then((result) => {
-                    this.attachSocketHandlers();
-                });
+                this.getTraces();
             });
         }); 
     }
