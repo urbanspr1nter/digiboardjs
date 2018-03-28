@@ -1,5 +1,6 @@
 import React from 'react';
 import Colors from './lib/Colors';
+import Configuration from './lib/Configuration';
 import PenBoard from './PenBoard.jsx';
 import Button from './Button.jsx';
 
@@ -17,6 +18,7 @@ export default class WsWhiteboard extends React.Component {
             canvasWidth: this.props.width,
             canvasHeight: this.props.height,
             currTraceBatch: [],
+            batchSequence: 0,
             canvas: null,
             canvasContext : null,
             penColor: null,
@@ -29,6 +31,52 @@ export default class WsWhiteboard extends React.Component {
                 name: 'No one'
             }
         };
+    }
+
+    pushTrace(type, eventType) {
+        let opts = {
+            eventType: (typeof eventType === 'undefined' || eventType === null) ? 'movement' : 'release'
+        };
+
+        const data = {
+            type: type,
+            x: this.state.x,
+            y: this.state.y,
+            color: {
+                r: this.state.penColor.r,
+                g: this.state.penColor.g,
+                b: this.state.penColor.b
+            },
+            name: this.state.user.name,
+            sessionId: this.props.sessionId,
+            sequence: this.state.sequence
+        };
+
+        let traceBatch = Array.from(this.state.currTraceBatch);
+
+        if(opts.eventType === 'movement') {
+            traceBatch.push(data);
+        }
+
+        if(traceBatch.length === Configuration.BatchLimit || opts.eventType === 'release') {
+            this.props.socket.emit('batchPush', {
+                sessionId: this.props.sessionId,
+                data: traceBatch,
+                sequence: this.state.batchSequence
+            });
+
+            traceBatch = [];
+            this.setState({
+                batchSequence: this.state.batchSequence + 1
+            });
+        }
+
+        this.setState({
+            sequence: this.state.sequence + 1,
+            currTraceBatch: traceBatch
+        }, () => {
+            this.props.socket.emit('push', JSON.stringify(data));
+        });
     }
 
     mouseDown(event) {
@@ -46,43 +94,18 @@ export default class WsWhiteboard extends React.Component {
             this.state.canvasContext.beginPath();
             this.state.canvasContext.moveTo(this.state.x, this.state.y);
 
-            const data = JSON.stringify({
-                type: 'move',
-                x: this.state.x,
-                y: this.state.y,
-                color: {
-                    r: this.state.penColor.r,
-                    g: this.state.penColor.g,
-                    b: this.state.penColor.b
-                },
-                sessionId: this.props.sessionId,
-                sequence: this.state.sequence
-            });
-
-            // socket emit
-            let traceBatch = Array.from(this.state.currTraceBatch);
-            traceBatch.push(JSON.parse(data));
-            console.log('PUSHED A TRACE.');
-            if(traceBatch.length === 32) {
-                this.props.socket.emit('batchPush', { sessionId: this.props.sessionId, data: traceBatch, sequence: this.state.sequence});
-                traceBatch = [];
-            }
-
-            this.setState({
-                sequence: this.state.sequence + 1,
-                currTraceBatch: traceBatch
-            }, () => {
-                this.props.socket.emit('push', data);
-            });
+            this.pushTrace('move');
         });
     }
 
     mouseUp(event) {
         const e = event;
         e.preventDefault();
+
         this.setState({
             mouseClicked: false,
-            statusMessage: 'No one is drawing.'
+            statusMessage: 'No one is drawing.',
+            currTraceBatch: []
         });
     }
 
@@ -100,35 +123,7 @@ export default class WsWhiteboard extends React.Component {
                 this.state.canvasContext.lineTo(this.state.x, this.state.y);
                 this.state.canvasContext.stroke();
 
-                const data = JSON.stringify({
-                    type: 'draw',
-                    x: this.state.x,
-                    y: this.state.y,
-                    color: {
-                        r: this.state.penColor.r,
-                        g: this.state.penColor.g,
-                        b: this.state.penColor.b
-                    },
-                    name: this.state.user.name,
-                    sessionId: this.props.sessionId,
-                    sequence: this.state.sequence
-                });
-
-                // socket emit
-                let traceBatch = Array.from(this.state.currTraceBatch);
-                traceBatch.push(JSON.parse(data));
-                console.log('PUSHED A TRACE.');
-                if(traceBatch.length === 32) {
-                    this.props.socket.emit('batchPush', { sessionId: this.props.sessionId, data: traceBatch, sequence: this.state.sequence});
-                    traceBatch = [];
-                }
-    
-                this.setState({
-                    sequence: this.state.sequence + 1,
-                    currTraceBatch: traceBatch
-                }, () => {
-                    this.props.socket.emit('push', data);
-                });
+                this.pushTrace('draw');
             });
         }
     }
@@ -237,12 +232,6 @@ export default class WsWhiteboard extends React.Component {
         this.setState({
             canvas: document.getElementById('mainCanvas')
         }, () => {
-            const theCanvas = document.getElementById('mainCanvas');
-
-            theCanvas.addEventListener('touchstart', (e) => this.mouseDown(e), false);
-            theCanvas.addEventListener('touchmove', (e) => this.mouseMove(e), false);
-            theCanvas.addEventListener('touchend', (e) => this.mouseUp(e), false);
-
             this.state.canvas.width = this.state.canvasWidth;
             this.state.canvas.height = this.state.canvasHeight;
 

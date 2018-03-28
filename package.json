@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack",
     "start": "node app.js",
-    "debug": "npm run build && npm run start",
+    "debug-start": "node --nolazy --inspect-brk=9229 app.js",
+    "debug": "npm run build && npm run debug-start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Roger Ngo",
@@ -21,7 +22,7 @@
     "mongoose": "5.0.11",
     "react": "16.2.0",
     "react-dom": "16.2.0",
-    "request": "^2.85.0",
+    "request": "2.85.0",
     "socket.io": "2.0.4",
     "uuid": "3.2.1",
     "webpack": "4.1.1"

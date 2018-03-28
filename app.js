@@ -56,10 +56,9 @@ app.get('/traces', function(req, res) {
       return results;
     });
   }).then((docs) => {
-    for(let i = 0; i < docs.length; i++) {
-      if(docs[i].length > 0) {
-        data.push(...docs[i][0].data);
-      }
+    const allTraces = docs[0];
+    for(let i = 0; i < allTraces.length; i++) {
+      data.push(...allTraces[i].data);
     }
     res.send(JSON.stringify(data));
   });
